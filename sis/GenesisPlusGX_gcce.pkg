@@ -1,0 +1,36 @@
+;
+; SDL installation file
+;
+
+; No languages - English by default
+;
+
+;Languages
+&EN
+;Header
+
+#{"GenesisPlusGX"},(0xE00056ce),1,0,0,TYPE=SISAPP
+
+;Localised Vendor name
+%{"JigokuMaster"} : "JigokuMaster"
+
+;Supports Series 60 v 3.0
+[0x101F7961], 0, 0, 0, {"Series60ProductID"}
+;Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"Series60ProductID"}
+;Supports Symbian^3
+[0x20022E6D], 0, 0, 0, {"Series60ProductID"}
+
+
+"..\src\Genesis-Plus-GX-master\LICENSE.txt"-"!:\private\E00056ce\LICENSE.txt"
+, FT, TC
+
+; files
+"\epoc32\release\gcce\urel\GenesisPlusGX.exe"-"!:\sys\bin\GenesisPlusGX.exe"
+"\epoc32\data\z\resource\apps\GenesisPlusGX.rsc"-"!:\resource\apps\GenesisPlusGX.rsc"
+"\epoc32\data\z\private\10003a3f\import\apps\GenesisPlusGX_reg.rsc"-"!:\private\10003a3f\import\apps\GenesisPlusGX_reg.rsc"
+;"..\gfx\GenesisPlusGX.mbm"-"!:\resource\apps\GenesisPlusGX.mbm"
+"$(EPOCROOT)epoc32\data\z\resource\apps\GenesisPlusGX_aif.mif"-"!:\resource\apps\GenesisPlusGX_aif.mif"
+"..\data\pixelfont-7.ttf"-"!:\private\E00056ce\pixelfont-7.ttf"
+
+

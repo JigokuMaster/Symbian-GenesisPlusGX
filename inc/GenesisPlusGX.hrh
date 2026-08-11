@@ -1,0 +1,35 @@
+#ifndef __GENESISPLUSGX_HRH__
+#define __GENESISPLUSGX_HRH__
+
+enum TEmuMenuCmds
+{
+    ECmdLoadROM = 0x6001,
+    ECmdSaveState,
+    ECmdLoadState,
+    ECmdAudioSettings,
+    ECmdControlSettings,
+    ECmdExitEmu,
+    EEmuCmdSettingsChange,
+    EEmuCmdSettingsExit,
+    EEmuSettingItemList
+};
+
+// AknForm items
+enum TEmuSettingsIds
+{
+    EAudioSettingsItem1 = 1,
+    EAudioSettingsItem2
+
+};
+
+                     
+enum TEmuSettingListTabs
+    {
+    ETabAudioSettings = 0,
+    ETabControlSettings  
+    };
+ 
+
+
+#endif
+

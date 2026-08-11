@@ -1,0 +1,47 @@
+//  RESOURCE IDENTIFIER
+NAME    GNPX
+#include <eikon.rh>
+#include <avkon.rh>
+#include <avkon.rsg>
+#include <avkon.mbg>
+#include <eikon.hrh>
+#include <appinfo.rh>
+#include "GenesisPlusGX.hrh"
+
+RESOURCE RSS_SIGNATURE {}
+
+RESOURCE TBUF { buf=""; }
+    
+   
+RESOURCE EIK_APP_INFO
+{
+    menubar=r_GenesisPlusGX_menubar;
+    //cba=R_AVKON_SOFTKEYS_OPTIONS_EXIT;
+    cba=R_AVKON_SOFTKEYS_EMPTY;
+
+}
+
+
+RESOURCE MENU_BAR r_GenesisPlusGX_menubar
+{
+    titles=
+    {
+	MENU_TITLE
+	{ 
+	    menu_pane=R_AVKON_MENUPANE_EMPTY;
+	}
+    };
+}
+
+RESOURCE LOCALISABLE_APP_INFO r_GenesisPlusGX_localisable_app_info
+{
+    short_caption = "GenPlus-GX";
+    caption_and_icon = CAPTION_AND_ICON_INFO
+        {
+            caption = "GenPlus-GX";
+            number_of_icons = 1;
+            icon_file = "\\resource\\apps\\GenesisPlusGX_aif.mif";        
+        };
+}
+    
+

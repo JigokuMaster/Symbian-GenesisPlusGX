@@ -1,0 +1,16 @@
+*.o
+*.d
+*.elf
+*.exe
+*.old
+*.sis
+*.sisx
+*.cer
+*.key
+*.mif
+*.mbm
+gfx/temp
+makebuild-ng/
+*.ttf
+src/bin
+cfg.bin
