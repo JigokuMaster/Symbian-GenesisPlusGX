@@ -48,7 +48,7 @@ extern "C" void EPOC_SetAudioVolume(int);
 #else
 #define SOUND_FREQUENCY 22050
 #define SOUND_SAMPLES_SIZE  1024//2048
-#define EMU_FONT "assets/pixelfont-7.ttf"
+#define EMU_FONT "pixelfont-7.ttf"
 #endif
 
 #define VIDEO_WIDTH  320
@@ -158,7 +158,9 @@ TInt PopulateRomList(SdlListbox* aListbox, const TDesC& aPath)
 	    if (
 		!ext.CompareF(_L(".sms")) ||
 		!ext.CompareF(_L(".gg")) ||
+#ifdef ENABLE_SEGACD
 		!ext.CompareF(_L(".md")) ||
+#endif
 		!ext.CompareF(_L(".sg"))
 	    )
 	    {
@@ -435,7 +437,7 @@ void Emu::SetTimerState(int state)
 Uint32 Emu::HandleTimerCallback(Uint32 interval) {
         SDL_SemPost(iSdlSync.sem_sync);
         iSdlSync.ticks++;
-#if 0
+#ifndef __SYMBIAN32__
         if (iSdlSync.ticks == (vdp_pal ? 50 : 20)) {
             SDL_Event event;
             SDL_UserEvent userevent;
@@ -555,11 +557,14 @@ inline void Emu::UpdateVideoFrame()
 	}
  
 
+#ifdef  ENABLE_SEGACD
 	if (system_hw == SYSTEM_MCD) {
             system_frame_scd(skipFrame);
         } else if ((system_hw & SYSTEM_PBC) == SYSTEM_MD) {
             system_frame_gen(skipFrame);
-        } else {
+        } else 
+#endif
+	{
             system_frame_sms(skipFrame);
         }
         
@@ -861,9 +866,9 @@ void Emu::ConfigureVideoBlitRect()
 	}
 
 
-	PRINT_MSG("BLIT_DEST_RECT_KAR %d,%d %d, %d", iSdlVideo.drect.x, iSdlVideo.drect.y, iSdlVideo.drect.w, iSdlVideo.drect.h);
+	//PRINT_MSG("BLIT_DEST_RECT %d,%d %d, %d", iSdlVideo.drect.x, iSdlVideo.drect.y, iSdlVideo.drect.w, iSdlVideo.drect.h);
 
-	PRINT_MSG("BLIT_SRC_RECT_KAR %d,%d %d, %d", iSdlVideo.srect.x, iSdlVideo.srect.y, iSdlVideo.srect.w, iSdlVideo.srect.h);
+	//PRINT_MSG("BLIT_SRC_RECT %d,%d %d, %d", iSdlVideo.srect.x, iSdlVideo.srect.y, iSdlVideo.srect.w, iSdlVideo.srect.h);
     }
 
 
@@ -1174,7 +1179,7 @@ void Emu::AutoLoadState()
 	{
 	    Uint32 slotNum = iStateManager->getSlotCount();
 
-	    PRINT_MSG("SlotCount %u", slotNum);
+	    //PRINT_MSG("SlotCount %u", slotNum);
 	    if ( slotNum < 1 ) return;
 
 	    iStateManager->getSlotFilename(slotNum, fp, PATH_MAX);
@@ -1892,7 +1897,10 @@ const char* Emu::ShowROMList()
     if (romsCount < 1)
     {
 #ifdef __SYMBIAN32__
-	listbox->AddItem("Put your ROMs in E:"ROMS_PATH_PREFIX);
+	listbox->AddItem("No ROMs found in:");
+	listbox->AddItem("E:"ROMS_PATH_PREFIX);
+	listbox->AddItem("C:"ROMS_PATH_PREFIX);
+	listbox->AddItem("F:"ROMS_PATH_PREFIX);
 #endif
     }
 

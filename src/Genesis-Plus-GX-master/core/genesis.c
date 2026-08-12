@@ -74,6 +74,8 @@ void gen_init(void)
   /* initialize Z80 */
   z80_init(0,z80_irq_callback);
 
+#ifdef ENABLE_SEGACD
+
   /* 8-bit / 16-bit modes */
   if ((system_hw & SYSTEM_PBC) == SYSTEM_MD)
   {
@@ -168,15 +170,12 @@ void gen_init(void)
     if (system_hw == SYSTEM_MCD)
     {
 
-#ifdef ENABLE_SEGACD
-
       /* initialize SUB-CPU */
       s68k_init();
       s68k.aerr_enabled = config.addr_error; 
 
       /* initialize CD hardware */
       scd_init();
-#endif
     }
     else
     {
@@ -186,7 +185,9 @@ void gen_init(void)
 
     }
   }
+
   else
+#endif
   {
     /* initialize cartridge hardware & Z80 memory handlers */
     sms_cart_init();

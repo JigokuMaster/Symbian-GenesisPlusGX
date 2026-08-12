@@ -352,6 +352,7 @@ void system_reset(void)
   audio_reset();
 }
 
+#ifdef ENABLE_SEGACD
 void system_frame_gen(int do_skip)
 {
   /* line counters */
@@ -705,7 +706,6 @@ void system_frame_gen(int do_skip)
 
 void system_frame_scd(int do_skip)
 {
-#ifdef ENABLE_SEGACD
   /* line counters */
   int start, end, line;
 
@@ -1045,8 +1045,9 @@ void system_frame_scd(int do_skip)
   m68k.cycles -= mcycles_vdp;
   Z80.cycles -= mcycles_vdp;
   dma_endCycles = 0;
-#endif // ENABLE_SEGACD
 }
+
+#endif // ENABLE_SEGACD
 
 void system_frame_sms(int do_skip)
 {

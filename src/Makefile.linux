@@ -28,14 +28,15 @@
 # -DHOOK_CPU         : enable CPU hooks
 # -DENABLE_SUB_68K_ADDRESS_ERROR_EXCEPTIONS : enable address error exceptions emulation for SUB-CPU
 
-NAME	  = gen_sdl
+BIN	  = gen_sdl
 
 CC        = gcc
 CXX       = g++
 
 CFLAGS    = `sdl-config --cflags` -march=native -O6 -fomit-frame-pointer -Wall -Wno-strict-aliasing -std=c99 -pedantic-errors
 
-CXXFLAGS    = `sdl-config --cflags` -march=native -O6 -fomit-frame-pointer -Wall -Wno-strict-aliasing -std=c++98 -pedantic-errors
+CXXFLAGS    = `sdl-config --cflags` -march=native -O6 -fomit-frame-pointer -Wall -Wno-strict-aliasing -std=c++98 
+#-pedantic-errors
 
 #-g -ggdb -pg
 #-fomit-frame-pointer
@@ -59,170 +60,177 @@ LIBS	  = `sdl-config --libs` -lz -lm
 CHDLIBDIR = $(SRCDIR)/cd_hw/libchdr
 INCLUDES += -I$(CHDLIBDIR)/include -I$(CHDLIBDIR)/deps/lzma-24.05/include
 
-OBJDIR = ./build_sdl
+BINDIR = ./bin
 
-OBJECTS	=       $(OBJDIR)/z80.o	
+OBJECTS	=       $(BINDIR)/z80.o	
 
-OBJECTS	+=     	$(OBJDIR)/m68kcpu.o \
-		$(OBJDIR)/s68kcpu.o
+OBJECTS	+=     	$(BINDIR)/m68kcpu.o \
+		$(BINDIR)/s68kcpu.o
 
-OBJECTS	+=     	$(OBJDIR)/genesis.o	 \
-		$(OBJDIR)/vdp_ctrl.o	 \
-		$(OBJDIR)/vdp_render.o   \
-		$(OBJDIR)/system.o       \
-		$(OBJDIR)/io_ctrl.o	 \
-		$(OBJDIR)/mem68k.o	 \
-		$(OBJDIR)/memz80.o	 \
-		$(OBJDIR)/membnk.o	 \
-		$(OBJDIR)/state.o        \
-		$(OBJDIR)/loadrom.o	
+OBJECTS	+=     	$(BINDIR)/genesis.o	 \
+		$(BINDIR)/vdp_ctrl.o	 \
+		$(BINDIR)/vdp_render.o   \
+		$(BINDIR)/system.o       \
+		$(BINDIR)/io_ctrl.o	 \
+		$(BINDIR)/mem68k.o	 \
+		$(BINDIR)/memz80.o	 \
+		$(BINDIR)/membnk.o	 \
+		$(BINDIR)/state.o        \
+		$(BINDIR)/loadrom.o	
 
-OBJECTS	+=      $(OBJDIR)/input.o	  \
-		$(OBJDIR)/gamepad.o	  \
-		$(OBJDIR)/lightgun.o	  \
-		$(OBJDIR)/mouse.o	  \
-		$(OBJDIR)/activator.o	  \
-		$(OBJDIR)/xe_1ap.o	  \
-		$(OBJDIR)/teamplayer.o    \
-		$(OBJDIR)/paddle.o	  \
-		$(OBJDIR)/sportspad.o     \
-		$(OBJDIR)/terebi_oekaki.o \
-		$(OBJDIR)/graphic_board.o \
-		$(OBJDIR)/smash.o
+OBJECTS	+=      $(BINDIR)/input.o	  \
+		$(BINDIR)/gamepad.o	  \
+		$(BINDIR)/lightgun.o	  \
+		$(BINDIR)/mouse.o	  \
+		$(BINDIR)/activator.o	  \
+		$(BINDIR)/xe_1ap.o	  \
+		$(BINDIR)/teamplayer.o    \
+		$(BINDIR)/paddle.o	  \
+		$(BINDIR)/sportspad.o     \
+		$(BINDIR)/terebi_oekaki.o \
+		$(BINDIR)/graphic_board.o \
+		$(BINDIR)/smash.o
 
-OBJECTS	+=      $(OBJDIR)/sound.o	\
-		$(OBJDIR)/psg.o         \
-		$(OBJDIR)/ym2413.o      \
-		$(OBJDIR)/opll.o        \
-		$(OBJDIR)/ym3438.o      \
-		$(OBJDIR)/ym2612.o    
+OBJECTS	+=      $(BINDIR)/sound.o	\
+		$(BINDIR)/psg.o         \
+		$(BINDIR)/ym2413.o      \
+		$(BINDIR)/opll.o        \
+		$(BINDIR)/ym3438.o      \
+		$(BINDIR)/ym2612.o    
 
-OBJECTS	+=	$(OBJDIR)/blip_buf.o 
+OBJECTS	+=	$(BINDIR)/blip_buf.o 
 
-OBJECTS	+=	$(OBJDIR)/eq.o 
+OBJECTS	+=	$(BINDIR)/eq.o 
 
-OBJECTS	+=      $(OBJDIR)/sram.o        \
-		$(OBJDIR)/svp.o	        \
-		$(OBJDIR)/ssp16.o       \
-		$(OBJDIR)/ggenie.o      \
-		$(OBJDIR)/areplay.o	\
-		$(OBJDIR)/eeprom_93c.o  \
-		$(OBJDIR)/eeprom_i2c.o  \
-		$(OBJDIR)/eeprom_spi.o  \
-		$(OBJDIR)/flash_cfi.o   \
-		$(OBJDIR)/yx5200.o      \
-		$(OBJDIR)/sms_cart.o	\
-		$(OBJDIR)/md_cart.o  \
-		$(OBJDIR)/megasd.o 
+OBJECTS	+=      $(BINDIR)/sram.o        \
+		$(BINDIR)/svp.o	        \
+		$(BINDIR)/ssp16.o       \
+		$(BINDIR)/ggenie.o      \
+		$(BINDIR)/areplay.o	\
+		$(BINDIR)/eeprom_93c.o  \
+		$(BINDIR)/eeprom_i2c.o  \
+		$(BINDIR)/eeprom_spi.o  \
+		$(BINDIR)/flash_cfi.o   \
+		$(BINDIR)/yx5200.o      \
+		$(BINDIR)/sms_cart.o	\
+		$(BINDIR)/md_cart.o  \
+		$(BINDIR)/megasd.o 
 ifeq ($(ENABLE_CDS),1)
 
-OBJECTS +=	$(OBJDIR)/scd.o	\
-		$(OBJDIR)/cdd.o	\
-		$(OBJDIR)/cdc.o	\
-		$(OBJDIR)/pcm.o	\
-		$(OBJDIR)/gfx.o	\
-		$(OBJDIR)/cd_cart.o
+OBJECTS +=	$(BINDIR)/scd.o	\
+		$(BINDIR)/cdd.o	\
+		$(BINDIR)/cdc.o	\
+		$(BINDIR)/pcm.o	\
+		$(BINDIR)/gfx.o	\
+		$(BINDIR)/cd_cart.o
 endif
 
-OBJECTS	+=	$(OBJDIR)/sms_ntsc.o	\
-		$(OBJDIR)/md_ntsc.o
+OBJECTS	+=	$(BINDIR)/sms_ntsc.o	\
+		$(BINDIR)/md_ntsc.o
 
-OBJECTS	+=	$(OBJDIR)/SdlUiToolkit.o \
-		$(OBJDIR)/Emu.o	\
-		$(OBJDIR)/EmuUtils.o	\
-		$(OBJDIR)/blitter.o	\
-		$(OBJDIR)/config.o	\
-		$(OBJDIR)/error.o	\
-		$(OBJDIR)/unzip.o       \
-		$(OBJDIR)/fileio.o	
-OBJECTS	+=	$(OBJDIR)/bitwise.o    \
-		$(OBJDIR)/block.o      \
-		$(OBJDIR)/codebook.o   \
-		$(OBJDIR)/floor0.o     \
-		$(OBJDIR)/floor1.o     \
-		$(OBJDIR)/framing.o    \
-		$(OBJDIR)/info.o       \
-		$(OBJDIR)/mapping0.o   \
-		$(OBJDIR)/mdct.o       \
-		$(OBJDIR)/registry.o   \
-		$(OBJDIR)/res012.o     \
-		$(OBJDIR)/sharedbook.o \
-		$(OBJDIR)/synthesis.o  \
-		$(OBJDIR)/vorbisfile.o \
-		$(OBJDIR)/window.o
+OBJECTS	+=	$(BINDIR)/SdlUiToolkit.o \
+		$(BINDIR)/Emu.o	\
+		$(BINDIR)/EmuUtils.o	\
+		$(BINDIR)/blitter.o	\
+		$(BINDIR)/config.o	\
+		$(BINDIR)/error.o	\
+		$(BINDIR)/unzip.o       \
+		$(BINDIR)/fileio.o	
+OBJECTS	+=	$(BINDIR)/bitwise.o    \
+		$(BINDIR)/block.o      \
+		$(BINDIR)/codebook.o   \
+		$(BINDIR)/floor0.o     \
+		$(BINDIR)/floor1.o     \
+		$(BINDIR)/framing.o    \
+		$(BINDIR)/info.o       \
+		$(BINDIR)/mapping0.o   \
+		$(BINDIR)/mdct.o       \
+		$(BINDIR)/registry.o   \
+		$(BINDIR)/res012.o     \
+		$(BINDIR)/sharedbook.o \
+		$(BINDIR)/synthesis.o  \
+		$(BINDIR)/vorbisfile.o \
+		$(BINDIR)/window.o
 
 ifeq ($(OS),Windows_NT)
-OBJECTS	+=	$(OBJDIR)/icon.o
+OBJECTS	+=	$(BINDIR)/icon.o
 endif
 
-all: $(NAME)
+all: $(BIN)
 
-$(NAME): $(OBJDIR) $(OBJECTS)
-		$(CXX) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $@
+$(BIN): $(BINDIR) $(OBJECTS)
+		$(CXX) $(LDFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$@
 
-$(OBJDIR) :
+$(BINDIR) :
 		@[ -d $@ ] || mkdir -p $@
 		
-$(OBJDIR)/%.o : $(SRCDIR)/%.c $(SRCDIR)/%.h
+$(BINDIR)/%.o : $(SRCDIR)/%.c $(SRCDIR)/%.h
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 	        	        
-$(OBJDIR)/%.o :	$(SRCDIR)/sound/%.c $(SRCDIR)/sound/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/sound/%.c $(SRCDIR)/sound/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/sound/tremor/%.c 	        
+$(BINDIR)/%.o :	$(SRCDIR)/sound/tremor/%.c 	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/input_hw/%.c $(SRCDIR)/input_hw/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/input_hw/%.c $(SRCDIR)/input_hw/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/cart_hw/%.c $(SRCDIR)/cart_hw/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/cart_hw/%.c $(SRCDIR)/cart_hw/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/cart_hw/svp/%.c      
+$(BINDIR)/%.o :	$(SRCDIR)/cart_hw/svp/%.c      
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/cart_hw/svp/%.c $(SRCDIR)/cart_hw/svp/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/cart_hw/svp/%.c $(SRCDIR)/cart_hw/svp/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/cd_hw/%.c $(SRCDIR)/cd_hw/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/cd_hw/%.c $(SRCDIR)/cd_hw/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/z80/%.c $(SRCDIR)/z80/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/z80/%.c $(SRCDIR)/z80/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/m68k/%.c       
+$(BINDIR)/%.o :	$(SRCDIR)/m68k/%.c       
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(SRCDIR)/ntsc/%.c $(SRCDIR)/ntsc/%.h	        
+$(BINDIR)/%.o :	$(SRCDIR)/ntsc/%.c $(SRCDIR)/ntsc/%.h	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-#$(OBJDIR)/%.o :	$(CHDLIBDIR)/src/%.c 	        
+#$(BINDIR)/%.o :	$(CHDLIBDIR)/src/%.c 	        
 #		$(CC) -c $(CFLAGS) $(INCLUDES) -I$(CHDLIBDIR)/include -I$(CHDLIBDIR)/deps/zstd-1.5.6/lib -I$(CHDLIBDIR)/deps/zstd-1.5.6/lib/common -I$(CHDLIBDIR)/deps/zlib-1.31 $< -o $@
 
-$(OBJDIR)/%.o :	$(CHDLIBDIR)/deps/lzma-24.05/src/%.c 	        
+$(BINDIR)/%.o :	$(CHDLIBDIR)/deps/lzma-24.05/src/%.c 	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(CHDLIBDIR)/deps/zstd-1.5.6/lib/common/%.c 	        
+$(BINDIR)/%.o :	$(CHDLIBDIR)/deps/zstd-1.5.6/lib/common/%.c 	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	$(CHDLIBDIR)/deps/zstd-1.5.6/lib/decompress/%.c 	        
+$(BINDIR)/%.o :	$(CHDLIBDIR)/deps/zstd-1.5.6/lib/decompress/%.c 	        
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
+$(BINDIR)/%.o :	$(SRCDIR)/../sdl/%.c $(SRCDIR)/../sdl/%.h	        
+		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	%.cpp %.h
+$(BINDIR)/%.o :	%.cpp
 		$(CXX) -c $(CXXFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
-$(OBJDIR)/%.o :	blitter.c 
+$(BINDIR)/%.o :	blitter.c 
 		$(CC) -c $(CFLAGS) $(INCLUDES) $(DEFINES) $< -o $@
 
 ifeq ($(OS),Windows_NT)
-$(OBJDIR)/icon.o :	
+$(BINDIR)/icon.o :	
 		windres $(SRCDIR)/../sdl/icon.rc $@
 endif
 
 pack	:
-		strip $(NAME)
-		upx -9 $(NAME)	        
+		strip $(BIN)
+		upx -9 $(BIN)	        
 
 clean:
-	rm -f $(OBJECTS) $(NAME)
+	rm -f $(OBJECTS) $(BIN)
+
+
+run:
+	cp ../data/pixelfont-7.ttf $(BINDIR)
+	cd $(BINDIR) && ./$(BIN)

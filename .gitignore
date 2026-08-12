@@ -10,7 +10,7 @@
 *.mif
 *.mbm
 gfx/temp
-makebuild-ng/
+makebuild-ng
 *.ttf
 src/bin
 cfg.bin

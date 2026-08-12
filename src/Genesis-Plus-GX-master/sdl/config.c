@@ -13,8 +13,8 @@ void set_config_defaults(void)
   config.fm_preamp      = 100;
   config.cdda_volume    = 100;
   config.pcm_volume     = 100;
-  config.hq_fm          = 0;
-  config.hq_psg         = 0;
+  config.hq_fm          = 1;
+  config.hq_psg         = 1;
   config.filter         = 0;
   config.low_freq       = 200;
   config.high_freq      = 8000;
@@ -25,7 +25,7 @@ void set_config_defaults(void)
   config.ym2612         = YM2612_DISCRETE;
   config.ym2413         = 2; /* = AUTO (0 = always OFF, 1 = always ON) */
   config.ym3438         = 0;
-  config.opll           = 1;
+  config.opll           = 0;
   config.mono           = 0;
 
   /* system options */
