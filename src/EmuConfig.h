@@ -28,26 +28,7 @@ struct EmuConfig {
     bool fullscreen;
     int skipFrames;
     int keys[28];  
+    bool scanlines; // apply scanlines filter.
 };
 
-/*struct EmuConfig {
-    char version[10];
-    bool audioEnabled;
-    int audioVolume;       // Range: 0 to 10
-    int up_btn;
-    int down_btn;
-    int left_btn;
-    int right_btn;
-    int a_btn;
-    int b_btn;
-    int c_btn;
-    int start_btn;
-    int x_btn;
-    int y_btn;
-int z_btn;
-    int ss_btn;
-    int ls_btn;
-    bool fullscreen;
-};
-*/
 #endif // EMUCONFIG_H

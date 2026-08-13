@@ -1,6 +1,10 @@
 #include <e32base.h>
 #include <eikapp.h>
 #include <sdlapp.h>
+#if defined (S60V3)
+#include <eikenv.h>
+#include <aknappui.h>
+#endif
 #include "SDLLauncher.hrh"
 #if defined (UIQ3)
 #include <ESDLTest.rsg>
@@ -9,7 +13,7 @@
 #include "ECompXL.h"
 #endif
 
-volatile int EPOC_APP_EXIT_FLAG = 0;
+
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,6 +30,7 @@ extern "C" void _epoc32_atexit(void (*function)(void))
 
 extern "C" void CloseSTDLIB(){} 
 #endif
+
 
 LOCAL_C void SetEPOCEnvVars()
 {
@@ -50,16 +55,25 @@ public:
 		return R_SDL_VIEW_UI_CONFIGURATIONS;
 		}
 
-	/*void LaunchAppL(int argc, char** params)
-	{
-	    char* argv[2];
-	    argv[0] = params[0];
-	    argv[1] = "C:\\Data\\SMSPlus\\sonic.sms";
-	    CSDLApp::LaunchAppL(2, argv);
-	}*/
-
-
 #endif
+
+
+	void LaunchAppL(int argc, char** argv)
+	{
+
+	    /*char* myargv[2];
+	    myargv[0] = argv[0];
+	    myargv[1] = "C:\\Data\\SMSPlus\\sonic.sms";*/
+	    SetEPOCEnvVars();
+#ifdef S60V3
+    
+	    CAknAppUi* appUi = dynamic_cast<CAknAppUi*>(CEikonEnv::Static()->AppUi());
+	    if (appUi) appUi->SetOrientationL(CAknAppUiBase::EAppUiOrientationPortrait);	    
+#endif
+	    CSDLApp::LaunchAppL(argc, argv);
+	}
+
+
 	TUid AppDllUid() const;
 #if defined (EPOC_AS_APP) && !defined (UIQ3) && !defined (S60V3)
 	TECompXL    iECompXL;
@@ -81,7 +95,6 @@ CApaApplication* NewApplication() {
 #include <eikstart.h>
 // E32Main() contains the program's start up code, the entry point for an EXE.
 GLDEF_C TInt E32Main() {
-    SetEPOCEnvVars();
     return EikStart::RunApplication(NewApplication);
 }
 #endif
@@ -93,7 +106,6 @@ GLDEF_C  TInt E32Dll(TDllReason) {
 	return KErrNone;
 }
 #endif
-
 CESDLTestApp::CESDLTestApp() {	
 }
 

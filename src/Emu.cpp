@@ -504,6 +504,47 @@ inline void Emu::UpdateAudioStream()
     }
 #endif
 
+
+/*
+ * SDL_SoftStretch replacement.
+ */
+
+inline void SoftStretchWithScanlines(SDL_Surface* src, const SDL_Rect* srcrect,
+                              SDL_Surface* dst, const SDL_Rect* dstrect,
+                              int enableScanlines) {
+    int sX, sY, sW, sH;
+    int dX, dY, dW, dH;
+
+    if (!src || !dst) return;
+
+    /* Resolve source rect (full surface if NULL) */
+    sX = srcrect ? srcrect->x : 0;
+    sY = srcrect ? srcrect->y : 0;
+    sW = srcrect ? srcrect->w : src->w;
+    sH = srcrect ? srcrect->h : src->h;
+
+    /* Resolve destination rect (full surface if NULL) */
+    dX = dstrect ? dstrect->x : 0;
+    dY = dstrect ? dstrect->y : 0;
+    dW = dstrect ? dstrect->w : dst->w;
+    dH = dstrect ? dstrect->h : dst->h;
+
+    if (SDL_MUSTLOCK(src)) SDL_LockSurface(src);
+    if (SDL_MUSTLOCK(dst)) SDL_LockSurface(dst);
+
+    FastStretchRectRGB565(
+        (const unsigned short*)src->pixels, src->pitch / 2,
+        sX, sY, sW, sH,
+        (unsigned short*)dst->pixels, dst->pitch / 2,
+        dX, dY, dW, dH,
+        enableScanlines
+    );
+
+    if (SDL_MUSTLOCK(dst)) SDL_UnlockSurface(dst);
+    if (SDL_MUSTLOCK(src)) SDL_UnlockSurface(src);
+}
+
+
 inline void Emu::UpdateVideoFrameDirect() 
 {
 
@@ -535,6 +576,33 @@ inline void Emu::UpdateVideoFrameDirect()
     }
 
 
+inline void Emu::UpdateVideoFrameFull() {
+  
+	int skipFrame = iFrameSkipCount > 0;
+	if(iUseSemSync && iConfig.skipFrames)
+	{
+	    skipFrame = (iSdlVideo.frames_rendered % iConfig.skipFrames == 0) ? 0 : 1;
+	}
+ 
+        system_frame_sms(skipFrame);
+        
+        if (!skipFrame) {
+       
+	    //SDL_SoftStretch(iSdlVideo.surf_bitmap, &iSdlVideo.srect, iSdlVideo.surf_screen, &iSdlVideo.drect);
+	    SoftStretchWithScanlines(iSdlVideo.surf_bitmap,
+		    &iSdlVideo.srect,
+		    iSdlVideo.surf_screen,
+		    &iSdlVideo.drect, iConfig.scanlines);
+    
+	    SDL_UpdateRect(iSdlVideo.surf_screen,
+		    iSdlVideo.drect.x,
+		    iSdlVideo.drect.y,
+		    iSdlVideo.drect.w,
+		    iSdlVideo.drect.h);
+        }
+        ++iSdlVideo.frames_rendered;
+	
+    }
 
 inline void Emu::UpdateVideoFrame()
 {
@@ -581,34 +649,24 @@ inline void Emu::UpdateVideoFrame()
 
             iSdlVideo.drect.w = bitmap.viewport.w;
             iSdlVideo.drect.h = bitmap.viewport.h;
-	    
-	    SDL_BlitSurface(iSdlVideo.surf_bitmap, &iSdlVideo.srect, iSdlVideo.surf_screen, &iSdlVideo.drect);
+	    if (iConfig.scanlines)
+	    {
+		SoftStretchWithScanlines(iSdlVideo.surf_bitmap,
+		    &iSdlVideo.srect,
+		    iSdlVideo.surf_screen,
+		    &iSdlVideo.drect, 1);
+	    }
+	    else{
+		SDL_BlitSurface(iSdlVideo.surf_bitmap,
+			&iSdlVideo.srect,
+			iSdlVideo.surf_screen,
+			&iSdlVideo.drect);
+	    }
 
 	    SDL_UpdateRect(iSdlVideo.surf_screen, iSdlVideo.drect.x, iSdlVideo.drect.y, iSdlVideo.drect.w, iSdlVideo.drect.h);
 
         }
         ++iSdlVideo.frames_rendered;
-    }
-
-inline void Emu::UpdateVideoFrameFull() {
-  
-	int skipFrame = iFrameSkipCount > 0;
-	if(iUseSemSync && iConfig.skipFrames)
-	{
-	    skipFrame = (iSdlVideo.frames_rendered % iConfig.skipFrames == 0) ? 0 : 1;
-	}
- 
-        system_frame_sms(skipFrame);
-        
-        if (!skipFrame) {
-       
-	    SDL_SoftStretch(iSdlVideo.surf_bitmap, &iSdlVideo.srect, iSdlVideo.surf_screen, &iSdlVideo.drect);
-	    
-	    SDL_UpdateRect(iSdlVideo.surf_screen, iSdlVideo.drect.x, iSdlVideo.drect.y, iSdlVideo.drect.w , iSdlVideo.drect.h);
-
-        }
-        ++iSdlVideo.frames_rendered;
-	
     }
 
 inline int Emu::UpdateInputDevice() {
@@ -1631,6 +1689,9 @@ void Emu::DrawOutputSettings(SdlListbox* listbox, int itemIndex)
     
 	sprintf(buffer, "Skip frames: %d", iConfig.skipFrames);
 	listbox->AddItem(buffer);
+
+	sprintf(buffer, "Scanlines filter: %s", iConfig.scanlines ? "on" : "off");
+	listbox->AddItem(buffer);
 	listbox->SetSelectedIndex(itemIndex);
 	DrawMenu(listbox);
     }
@@ -1684,7 +1745,9 @@ bool Emu::UpdateOutputSettings(SdlListbox* listbox, SDL_Event& event, bool* conf
 		    iConfig.skipFrames = n;
 		}
                 break;
-        
+            case 4:
+                iConfig.scanlines = !iConfig.scanlines;
+                break;
 	    }
 	}
 
@@ -1935,58 +1998,6 @@ const char* Emu::ShowROMList()
     delete listbox;
     return fp;
 }
-
-#if 0
-const char* Emu::ShowROMList()
-    {
-
-	SdlListbox* listbox = new SdlListbox(iSdlVideo.surf_screen, LAYOUT_FULLSCREEN, iFontSize);
-	listbox->SetTheme(darkTheme);
-	listbox->Clear();
-#ifdef __SYMBIAN32__
-
-	PopulateRomList(listbox, _L("C:"ROMS_PATH_PREFIX));
-	PopulateRomList(listbox, _L("E:"ROMS_PATH_PREFIX));
-	PopulateRomList(listbox, _L("F:"ROMS_PATH_PREFIX));
-#else
-
-        iRomsPath = (char*)"ROMs";
-        PopulateRomList(listbox, iRomsPath);
-#endif
- 
-	DrawMenu(listbox);
-        SDL_Event event;
-	const char* fp = NULL;
-        while (SDL_WaitEvent(&event))
-	{
-
-	    if (HandleResizeEvent(&event))
-	    {
-		continue;
-	    }
-	
-            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) {
-                break;
-            }
-            bool ok = listbox->HandleInput(event);
-	    DrawMenu(listbox);
-
-            if (ok){
-#ifdef __SYMBIAN32__
-		fp =  GetROMFilePath((const char*)listbox->GetSelectedTextW());
-
-#else
-		fp = GetROMFilePath(listbox->GetSelectedText());
-#endif
-		break;
-	    }
-        }
-        
-	delete listbox;
-        return fp;
-    }
-#endif
-
 
 bool Emu::ShowMainMenu() {
 

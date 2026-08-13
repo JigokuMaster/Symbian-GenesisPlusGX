@@ -5,8 +5,74 @@
 #include "SDL.h"
 
 // Helper utilities
+
 void ExtractBaseFilename(const char* fullPath, char* dest, size_t maxLen);
 void CalculateAspectRatioRect(int srcW, int srcH, int dstW, int dstH, SDL_Rect* outRect);
+
+/*
+ * High-Performance Software Stretch Routine for RGB565.
+ * Replaces SDL_SoftStretch with optimized 16.16 fixed-point math.
+ * 
+ * Supports source cropping (SrcRect), destination positioning (DstRect),
+ * scaling UP/DOWN, and fused 50% CRT scanlines.
+ */
+
+inline void FastStretchRectRGB565(const unsigned short* src, int srcStride,
+                              int srcX, int srcY, int srcW, int srcH,
+                              unsigned short* dst, int dstStride,
+                              int dstX, int dstY, int dstW, int dstH,
+                              int enableScanlines) {
+    int x, y;
+    unsigned long xStep, xAcc, yStep, yAcc;
+    int xLut[640]; /* Pre-calculated X offsets (max target width 640px) */
+
+    /* Basic safety checks */
+    if (!src || !dst || srcW <= 0 || srcH <= 0 || dstW <= 0 || dstH <= 0) {
+        return;
+    }
+
+    /* Clamp destination width to stack LUT bounds */
+    if (dstW > 640) {
+        dstW = 640;
+    }
+
+    /* 1. Pre-calculate X lookup table relative to srcX offset */
+    xStep = ((unsigned long)srcW << 16) / (unsigned long)dstW;
+    xAcc = 0;
+    for (x = 0; x < dstW; ++x) {
+        xLut[x] = srcX + (int)(xAcc >> 16);
+        xAcc += xStep;
+    }
+
+    /* 2. Setup Y fixed-point accumulator */
+    yStep = ((unsigned long)srcH << 16) / (unsigned long)dstH;
+    yAcc = 0;
+
+    /* 3. Render loop */
+    for (y = 0; y < dstH; ++y) {
+        int currentSrcY = srcY + (int)(yAcc >> 16);
+        const unsigned short* srcRow = src + (currentSrcY * srcStride);
+        
+        /* Offset destination pointer to (dstX, dstY + y) */
+        unsigned short* dstRow = dst + ((dstY + y) * dstStride) + dstX;
+
+        yAcc += yStep;
+
+        /* Fused scanline row pass */
+        if (enableScanlines && (y & 1)) {
+            for (x = 0; x < dstW; ++x) {
+                unsigned short color = srcRow[xLut[x]];
+                dstRow[x] = (unsigned short)((color >> 1) & 0x7BEFU);
+            }
+        } else {
+            /* Standard scaled row pass */
+            for (x = 0; x < dstW; ++x) {
+                dstRow[x] = srcRow[xLut[x]];
+            }
+        }
+    }
+}
+
 
 class StateManager {
 public:
