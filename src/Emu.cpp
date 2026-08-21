@@ -241,7 +241,6 @@ private:
     int iSysScreenHeight;
     bool iRunning;
     int iJoyNum;
-    int iUseSemSync;
     int iUseSound;
     int iFullscreen;
 
@@ -303,7 +302,7 @@ public:
         : iEmuScreenWidth(0), iEmuScreenHeight(0),
 	  iSysScreenWidth(SMS_SCREEN_WIDTH), iSysScreenHeight(SMS_SCREEN_HEIGHT),
 	  iRunning(false),iJoyNum(0),
-	  iUseSemSync(true), iUseSound(true), iFullscreen(false),
+	  iUseSound(true), iFullscreen(false),
           iBMPFont(NULL), iFontSize(34), iRomsPath(NULL), iStateManager(NULL), iFrameSkipCount(0)
     {
         memset(&iSdlSound, 0, sizeof(iSdlSound));
@@ -337,18 +336,8 @@ public:
         }
     }
 
-    // Global timer sync callback router
-    static Uint32 TimerCallbackWrapper(Uint32 interval, void* param) {
-	if (!gTimerActive) return interval;
-        if (param) {
-            return static_cast<Emu*>(param)->HandleTimerCallback(interval);
-        }
-        return interval;
-    }
-
 public:
     void HandleAudioCallback(Uint8* stream, int len);
-    Uint32 HandleTimerCallback(Uint32 interval);
 private:
 
     void SetTimerState(int state);
@@ -356,7 +345,6 @@ private:
     void UpdateVideoFrameDirect();
     void UpdateVideoFrame();
     void UpdateVideoFrameFull();
-    int InitSync();
     int InitAudio();
     void InitSysBitmap();
     void ConfigureVideoBlitRect();
@@ -405,7 +393,6 @@ private:
     bool ShowMainMenu();
     void CloseAudio();
     void CloseVideo();
-    void CloseSync();
     void Shutdown();
     bool HandleResizeEvent(SDL_Event* event);
     void HandleKeyEvent(SDLKey key);
@@ -433,28 +420,6 @@ void Emu::SetTimerState(int state)
     }
 }
 
-
-Uint32 Emu::HandleTimerCallback(Uint32 interval) {
-        SDL_SemPost(iSdlSync.sem_sync);
-        iSdlSync.ticks++;
-#ifndef __SYMBIAN32__
-        if (iSdlSync.ticks == (vdp_pal ? 50 : 20)) {
-            SDL_Event event;
-            SDL_UserEvent userevent;
-
-            userevent.type = SDL_USEREVENT;
-            userevent.code = vdp_pal ? (iSdlVideo.frames_rendered / 3) : iSdlVideo.frames_rendered;
-            userevent.data1 = NULL;
-            userevent.data2 = NULL;
-            iSdlSync.ticks = iSdlVideo.frames_rendered = 0;
-
-            event.type = SDL_USEREVENT;
-            event.user = userevent;
-            SDL_PushEvent(&event);
-        }
-#endif
-        return interval;
-    }
 
 #ifdef SYMBIAN_DIRECT_AUDIO
 inline void Emu::UpdateAudioStream()
@@ -549,11 +514,7 @@ inline void Emu::UpdateVideoFrameDirect()
 {
 
 	int skipFrame = iFrameSkipCount > 0;
-	if(iUseSemSync && iConfig.skipFrames)
-	{
-	    skipFrame = (iSdlVideo.frames_rendered % iConfig.skipFrames == 0) ? 0 : 1;
-	}
- 
+
 	//SDL_LockSurface(iSdlVideo.surf_screen);
 #ifdef  ENABLE_SEGACD
 	if (system_hw == SYSTEM_MCD) {
@@ -579,11 +540,7 @@ inline void Emu::UpdateVideoFrameDirect()
 inline void Emu::UpdateVideoFrameFull() {
   
 	int skipFrame = iFrameSkipCount > 0;
-	if(iUseSemSync && iConfig.skipFrames)
-	{
-	    skipFrame = (iSdlVideo.frames_rendered % iConfig.skipFrames == 0) ? 0 : 1;
-	}
- 
+
         system_frame_sms(skipFrame);
         
         if (!skipFrame) {
@@ -619,11 +576,7 @@ inline void Emu::UpdateVideoFrame()
 	}
 
 	int skipFrame = iFrameSkipCount > 0;
-	if(iUseSemSync && iConfig.skipFrames)
-	{
-	    skipFrame = (iSdlVideo.frames_rendered % iConfig.skipFrames == 0) ? 0 : 1;
-	}
- 
+
 
 #ifdef  ENABLE_SEGACD
 	if (system_hw == SYSTEM_MCD) {
@@ -965,23 +918,6 @@ int Emu::InitVideo() {
         SDL_ShowCursor(SDL_DISABLE);
         return 1;
     }
-
-int Emu::InitSync() {
-        if (SDL_InitSubSystem(SDL_INIT_TIMER) < 0) {
-            PRINT_ERRMSG("SDL Timing subsystem failed to start up: %s", SDL_GetError());
-            return 0;
-        }
-        iSdlSync.sem_sync = SDL_CreateSemaphore(0);
-        if (iSdlSync.sem_sync)
-	{
-            SDL_AddTimer(vdp_pal ? 60 : 50, reinterpret_cast<SDL_NewTimerCallback>(TimerCallbackWrapper), this);
-	    SetTimerState(SDL_ENABLE);
-        }
-
-        iSdlSync.ticks = 0;
-        return 1;
-    }
-
 
 
 // =========================================================================
@@ -2082,22 +2018,12 @@ void Emu::CloseVideo() {
     }
 
 
-
-void Emu::CloseSync() {
-
-    if (iSdlSync.sem_sync) {
-	SDL_DestroySemaphore(iSdlSync.sem_sync);
-	iSdlSync.sem_sync = NULL;
-    }
-}
-
 void Emu::Shutdown() {
 	SaveConfig();
         audio_shutdown();
         error_shutdown();
         CloseVideo();
         CloseAudio();
-        CloseSync();
         FreeMenuFont();
         SDL_Quit();
 	if (iStateManager) delete iStateManager;
@@ -2289,11 +2215,7 @@ int Emu::Run(int argc, char** argv){
 
 
 	InitAudio();
-        if (iUseSemSync) 
-	{
-	    if (!InitSync()) return 1;
-	}
-        
+       
         audio_init(SOUND_FREQUENCY, 0);
         system_init();
 
@@ -2352,11 +2274,7 @@ int Emu::Run(int argc, char** argv){
 	    UpdateInputDevice();
 	    UpdateVideoFrame();
             if ( iUseSound ) UpdateAudioStream();	
-	    if (!iUseSemSync) DoFrameSync();
-	    else if (iUseSemSync && iSdlSync.sem_sync && iSdlVideo.frames_rendered % 3 == 0)
-	    {
-                SDL_SemWait(iSdlSync.sem_sync);
-            }
+	    DoFrameSync();
 
         }
 
