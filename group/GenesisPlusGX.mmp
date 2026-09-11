@@ -45,6 +45,7 @@ SOURCE SDLAppLauncher.cpp
 SOURCE sdlexe.cpp
 #endif
 SOURCE Emu.cpp 
+SOURCE EmuCoreInterface.cpp
 SOURCE EmuUtils.cpp
 SOURCE DirectAudioStream.cpp
 SOURCE SdlUiToolkit.cpp 

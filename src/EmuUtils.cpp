@@ -1,13 +1,16 @@
+
 /*
- * File: Emu.cpp
+ * File: EmuUtils.cpp
  * Initial boilerplate/template generated via Gemini.
  * Adapted, refactored, and maintained by JigokuMaster.
  */
 
 #include "EmuUtils.h"
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <dirent.h>
+
 
 
 void ExtractBaseFilename(const char* fullPath, char* dest, size_t maxLen)
@@ -85,7 +88,7 @@ bool StateManager::buildSlotPath(unsigned int slot, char* outBuf, size_t bufSize
     sep = '\\';
 #endif
 
-    int written = snprintf(outBuf, bufSize, "%s%c%s.sav-%u", m_stateDir, sep, m_romName, slot);
+    int written = sprintf(outBuf, "%s%c%s.sav-%u", m_stateDir, sep, m_romName, slot);
     return (written > 0 && static_cast<size_t>(written) < bufSize);
 }
 
@@ -96,7 +99,7 @@ bool StateManager::buildAutoSavePath(char* outBuf, size_t bufSize) const {
 #ifdef __SYMBIAN32__
     sep = '\\';
 #endif
-    int written = snprintf(outBuf, bufSize, "%s%c%s.autosav", m_stateDir, sep, m_romName);
+    int written = sprintf(outBuf, "%s%c%s.autosav", m_stateDir, sep, m_romName);
     return (written > 0 && static_cast<size_t>(written) < bufSize);
 }
 
@@ -174,16 +177,10 @@ size_t StateManager::getAutoSaveFileSize() const {
 
 // Notifications and Cache Refreshing
 void StateManager::notifySlotSaved(unsigned int slot) {
-
-    if ( slot >= m_cachedSlotCount) {
-	m_cachedSlotCount++;
-    }
-
     if (slot < m_maxSlots) {
         m_lastSavedSlot = static_cast<int>(slot);
         refreshCache(); // Mark cache dirty so next query counts correctly
     }
-
 }
 
 void StateManager::notifySlotLoaded(unsigned int slot) {
@@ -217,8 +214,8 @@ unsigned int StateManager::getSlotCount() {
     }
 
     // Prepare matching prefix: "romname.sav-"
-    char expectedPrefix[MAX_NAME_LEN + 8];
-    snprintf(expectedPrefix, sizeof(expectedPrefix), "%s.sav-", m_romName);
+    char expectedPrefix[MAX_NAME_LEN + 8] = {0,};
+    sprintf(expectedPrefix, "%s.sav-", m_romName);
     size_t prefixLen = strlen(expectedPrefix);
 
 

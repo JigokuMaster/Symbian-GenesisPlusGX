@@ -1034,7 +1034,7 @@ void SdlViewPager::SetBitmap(SDL_Surface* externalBitmap) {
 
     // Isolate bounding dimensions within wireframe window
     int maxImageW = iWidth - 2; 
-    int maxImageH = iHeight - iTitleBarHeight - 2;
+    int maxImageH = iHeight - iTitleBarHeight - 4;
 
     // Use standard float mappings matching classic C++98 constraints
     float srcAspect = (float)externalBitmap->w / (float)externalBitmap->h;

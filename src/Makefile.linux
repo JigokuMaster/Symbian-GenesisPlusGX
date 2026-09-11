@@ -130,6 +130,7 @@ OBJECTS	+=	$(BINDIR)/sms_ntsc.o	\
 
 OBJECTS	+=	$(BINDIR)/SdlUiToolkit.o \
 		$(BINDIR)/Emu.o	\
+		$(BINDIR)/EmuCoreInterface.o \
 		$(BINDIR)/EmuUtils.o	\
 		$(BINDIR)/blitter.o	\
 		$(BINDIR)/config.o	\

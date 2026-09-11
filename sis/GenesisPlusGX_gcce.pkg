@@ -9,7 +9,7 @@
 &EN
 ;Header
 
-#{"GenesisPlusGX"},(0xE00056ce),1,0,0,TYPE=SISAPP
+#{"GenesisPlusGX"},(0xE00056ce),1,2,0,TYPE=SISAPP
 
 ;Localised Vendor name
 %{"JigokuMaster"} : "JigokuMaster"
